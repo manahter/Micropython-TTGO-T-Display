@@ -746,6 +746,73 @@ STATIC mp_obj_t st7789_map_bitarray_to_rgb565(size_t n_args, const mp_obj_t *arg
 
 STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(st7789_map_bitarray_to_rgb565_obj, 3, 6, st7789_map_bitarray_to_rgb565);
 
+STATIC void blit_bitarray(st7789_ST7789_obj_t *self, uint8_t const *bitarray, int length, int width, int x, int y,
+                                  uint16_t color, uint16_t bg_color) {
+
+    const uint16_t buf_max = 256;
+    uint8_t buf[buf_max];
+    uint8_t* buffer = buf;
+    uint16_t buf_i = 0;
+
+    int w = width % 8;
+    w = (w == 0) ? width : (width + 8 - w);
+    int h = ((length * 8) / w);
+        
+    set_window(self, x, y, x + width - 1, y + h - 1);
+    DC_HIGH();
+    CS_LOW();
+
+
+    int row_pos = 0;
+    for (int i = 0; i < length; i++) {
+        uint8_t byte = bitarray[i];
+        for (int bi = 7; bi >= 0; bi--) {
+            uint8_t b = byte & (1 << bi);
+            uint16_t cur_color = b ? color : bg_color;
+            *buffer = (cur_color & 0xff00) >> 8;
+            buffer++;
+            *buffer = cur_color & 0xff;
+            buffer++;
+            buf_i += 2;
+
+            if (buf_i == buf_max)  {
+                write_spi(self->spi_obj, (uint8_t *) buf, buf_i);
+                buffer = buf;
+                buf_i = 0;
+            }
+
+            row_pos++;
+            if (row_pos >= width) {
+                row_pos = 0;
+                break;
+            }
+        }
+    }
+    if (buf_i > 0)  {
+        write_spi(self->spi_obj, (uint8_t *) buf, buf_i);
+    }
+
+    CS_HIGH();
+}
+
+
+STATIC mp_obj_t st7789_blit_bitarray(size_t n_args, const mp_obj_t *args) {
+
+    mp_buffer_info_t bitarray_info;
+
+    st7789_ST7789_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    mp_get_buffer_raise(args[1], &bitarray_info, MP_BUFFER_READ);
+    mp_int_t width = mp_obj_get_int(args[2]);
+    mp_int_t x = mp_obj_get_int(args[3]);
+    mp_int_t y = mp_obj_get_int(args[4]);
+    mp_int_t color = mp_obj_get_int(args[5]);
+    mp_int_t bg_color = mp_obj_get_int(args[6]);
+    blit_bitarray(self, bitarray_info.buf, bitarray_info.len, width, x, y, color, bg_color);
+    return mp_const_none;
+}
+
+STATIC MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(st7789_ST7789_blit_bitarray_obj, 2, 7, st7789_blit_bitarray);
+
 
 STATIC const mp_rom_map_elem_t st7789_ST7789_locals_dict_table[] = {
     // Do not expose internal functions to fit iram_0 section
@@ -762,6 +829,7 @@ STATIC const mp_rom_map_elem_t st7789_ST7789_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_pixel), MP_ROM_PTR(&st7789_ST7789_pixel_obj) },
     { MP_ROM_QSTR(MP_QSTR_line), MP_ROM_PTR(&st7789_ST7789_line_obj) },
     { MP_ROM_QSTR(MP_QSTR_blit_buffer), MP_ROM_PTR(&st7789_ST7789_blit_buffer_obj) },
+    { MP_ROM_QSTR(MP_QSTR_blit_bitarray), MP_ROM_PTR(&st7789_ST7789_blit_bitarray_obj) },
     { MP_ROM_QSTR(MP_QSTR_fill_rect), MP_ROM_PTR(&st7789_ST7789_fill_rect_obj) },
     { MP_ROM_QSTR(MP_QSTR_fill), MP_ROM_PTR(&st7789_ST7789_fill_obj) },
     { MP_ROM_QSTR(MP_QSTR_hline), MP_ROM_PTR(&st7789_ST7789_hline_obj) },
