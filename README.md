@@ -1,4 +1,21 @@
-# ST7789 Driver for MicroPython
+# Deploying the firmware for ESP32
+
+[Before Download firmware](https://github.com/manahter/Micropython-TTGO-T-Display/raw/master/firmware/esp32/firmware-v1-13.bin)
+
+After in commandline
+
+> pip install esptool
+
+> esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 921600 erase_flash
+
+> esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 921600  write_flash -z 0x1000 firmware-v1-13.bin
+
+That's it.
+
+## Micropython compiling for ESP32
+https://www.microdev.it/wp/en/2018/08/08/esp32-micropython-compiling-for-esp32/
+
+## ST7789 Driver for MicroPython
 
 This is a fork of snst' st7789_mpy module from
 https://github.com/snst/st7789_mpy
