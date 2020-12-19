@@ -1,5 +1,11 @@
 # ST7789 Driver for MicroPython
 
+This is a fork of snst' st7789_mpy module from
+https://github.com/snst/st7789_mpy
+
+This is a fork of russhughes' st7789_mpy module from
+https://github.com/russhughes/st7789_mpy
+
 This is a fork of devbis' st7789_mpy module from
 https://github.com/devbis/st7789_mpy.
 
