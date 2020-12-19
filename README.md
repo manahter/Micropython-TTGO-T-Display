@@ -19,6 +19,7 @@ the st7789 C driver and frozen python font files.
 File         | Details
 ------------ | ----------------------------------------------------------
 firmware.bin | MicroPython v1.12-464-gcae77daf0 compiled with ESP IDF v3
+firmware-v1-13.bin | MicroPython v1.13-266-g069557ed 2020-12-19, compiled with ESP IDF v3
 
 ### firmware/pybv11 (Pyboard v1.1.)
 
